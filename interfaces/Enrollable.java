@@ -1,5 +1,6 @@
 package interfaces;
 
 public interface Enrollable {
-    void enroll();
+    void enrollCourse();
+    void dropCourse();
 }
