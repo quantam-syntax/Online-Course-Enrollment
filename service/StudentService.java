@@ -3,14 +3,6 @@ import model.Student;
 import repository.FileManager;
 import java.util.ArrayList;
 
-import model.Student;
-import repository.FileManager;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-
 public class StudentService {
     private ArrayList<Student>students;
     private FileManager fileManager;
