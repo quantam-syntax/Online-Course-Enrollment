@@ -1,4 +1,6 @@
-
+import service.CourseService;
+import service.EnrollmentService;
+import service.StudentService;
 import java.util.Scanner;
 
 public class Main {
@@ -10,7 +12,7 @@ public class Main {
             new EnrollmentService(courseService);
 
         while (true) {
-            System.out.println("\n=== Online Course Enrollment System ===");
+            System.out.println("     Online Course Enrollment System   ");
             System.out.println("1. Register Student");
             System.out.println("2. View Available Courses");
             System.out.println("3. Add Course");
