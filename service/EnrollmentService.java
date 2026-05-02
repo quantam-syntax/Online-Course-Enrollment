@@ -1,4 +1,9 @@
 package service;
+import model.Course;
+import model.Enrollment;
+import repository.FileManager;
+import java.util.ArrayList;
+import java.time.LocalDate;
 
 import model.Course;
 import model.Enrollment;
@@ -13,59 +18,70 @@ import java.util.stream.Collectors;
 
 
 public class EnrollmentService {
+    private ArrayList<Enrollment> enrollments;
+    private FileManager fileManager;
+    private CourseService courseService;
+    private int enrollmentCounter = 1;
 
-    private final List<Enrollment> enrollments;
-    private final FileManager      fileManager;
-    private int nextEnrollmentId;
-
-    public EnrollmentService(FileManager fileManager) {
-        this.fileManager  = fileManager;
-        this.enrollments  = new ArrayList<>(fileManager.loadEnrollments());
-        
-        this.nextEnrollmentId = enrollments.stream()
-                .mapToInt(Enrollment::getEnrollmentId)
-                .max()
-                .orElse(0) + 1;
+    public EnrollmentService(CourseService courseService){
+        this.enrollments = new ArrayList<>();
+        this.fileManager = new FileManager();
+        this.courseService = courseService;
+        loadFromFile();
     }
-
-    public boolean enrollStudent(Student student, Course course) {
-        
-        if (isEnrolled(student.getStudentId(), course.getCourseId())) {
-            System.out.println("[EnrollmentService] " + student.getName()
-                    + " is already enrolled in '" + course.getCourseName() + "'.");
-            return false;
+    private void loadFromFile(){
+        ArrayList<String[]>data = fileManager.loadEnrollments();
+        for (String[]parts : data){
+            if (parts.length == 4){
+                enrollments.add(new Enrollment(Integer.parseInt(parts[0]), parts[3] ,Integer.parseInt(parts[1]), Integer.parseInt(parts[2])));
+                enrollmentCounter = Integer.parseInt(parts[0] + 1);
+            }
         }
 
-        String     today      = LocalDate.now().toString();
-        Enrollment enrollment = new Enrollment(nextEnrollmentId++, today,
-                student.getStudentId(), course.getCourseId());
-
-        enrollments.add(enrollment);
-        student.addCourseToList(course.getCourseId());
-        student.enrollCourse();   
-
-        fileManager.saveEnrollments(enrollments);
-        System.out.println("[EnrollmentService] Enrollment successful! ID: "
-                + enrollment.getEnrollmentId() + " | Date: " + today);
-        return true;
     }
-
-    public boolean dropCourse(Student student, Course course) {
-        Optional<Enrollment> opt = findEnrollment(student.getStudentId(), course.getCourseId());
-        if (opt.isEmpty()) {
-            System.out.println("[EnrollmentService] " + student.getName()
-                    + " is not enrolled in '" + course.getCourseName() + "'.");
-            return false;
+    public void selectCourse(int studentId,int courseId){
+        boolean available = courseService.checkAvailability(courseId);
+        if (available){
+            Enrollment enrollment = new Enrollment(enrollmentCounter++,LocalDate.now().toString(),studentId,courseId);
+            enrollments.add(enrollment);
+            fileManager.saveEnrollment(enrollment);
+            System.out.println("Enrollment confirmed ID : " + enrollment.getEnrollmentId());
+        }else{
+            System.out.println("Error : course not available");
         }
 
-        enrollments.remove(opt.get());
-        student.dropCourse(); 
-
-        fileManager.saveEnrollments(enrollments);
-        System.out.println("[EnrollmentService] Drop successful for course: " + course.getCourseName());
-        return true;
+    
     }
+    public boolean dropCourse(int enrollmentId){
+        for (Enrollment e : enrollments){
+            if (e.getEnrollmentId() == enrollmentId){
+                enrollments.remove(e);
+                fileManager.deleteEnrollment(enrollmentId);
+                System.out.println("Course dropped ");
+                return true;
+            }
+        }
+        System.out.println("Enrollment not found");
+        return false;
+    }
+    public void viewEnrollments(int studentId){
+        boolean found = false;
+        for (Enrollment e : enrollments ){
+            if (e.getStudentId() == studentId){
+                Course course = courseService.getCourseById(e.getCourseId());
+                System.out.println("Enrollment ID : " + e.getEnrollmentId() + " Course : " + (course != null ? course.getCourseName() : e.getCourseId()) + "Date : " + e.getEnrollmentDate());
+                found = true;
+            }
+        }
+        if (!found){
+            System.out.println("Enrollment not found ");
 
+        }
+        }
+        public ArrayList<Enrollment>getEnrollments(){
+            return enrollments;
+
+        }
     
     public boolean isEnrolled(int studentId, int courseId) {
         return enrollments.stream()

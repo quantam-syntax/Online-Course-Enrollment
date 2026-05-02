@@ -3,126 +3,102 @@ package repository;
 import model.Course;
 import model.Enrollment;
 import model.Student;
-
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
 
 public class FileManager {
 
-    private static final String STUDENTS_FILE    = "students.csv";
-    private static final String COURSES_FILE     = "courses.csv";
-    private static final String ENROLLMENTS_FILE = "enrollments.csv";
+    private static final String STUDENTS_FILE = "students.txt";
+    private static final String COURSES_FILE = "courses.txt";
+    private static final String ENROLLMENTS_FILE = "enrollments.txt";
 
-    public void saveStudents(List<Student> students) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(STUDENTS_FILE))) {
-            for (Student s : students) {
-                writer.println(s.getStudentId() + "," +
-                               s.getId()        + "," +
-                               s.getName()      + "," +
-                               s.getDepartment());
-            }
+    public void saveStudent(Student student) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(STUDENTS_FILE, true))) {
+            bw.write(student.getStudentId() + "," +student.getName() + "," +student.getDepartment());
+            bw.newLine();
         } catch (IOException e) {
-            System.out.println("[FileManager] Error saving students: " + e.getMessage());
+            System.out.println("Error saving student: " + e.getMessage());
         }
     }
-
-    public List<Student> loadStudents() {
-        List<Student> students = new ArrayList<>();
-        File file = new File(STUDENTS_FILE);
-        if (!file.exists()) return students;
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+    public ArrayList<String[]> loadStudents() {
+        ArrayList<String[]> students = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(STUDENTS_FILE))) {
             String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty()) continue;
-                String[] parts = line.split(",", 4);
-                if (parts.length == 4) {
-                    int    studentId = Integer.parseInt(parts[0].trim());
-                    int    personId  = Integer.parseInt(parts[1].trim());
-                    String name      = parts[2].trim();
-                    String dept      = parts[3].trim();
-                    students.add(new Student(studentId, personId, name, dept));
-                }
+            while ((line = br.readLine()) != null) {
+                students.add(line.split(","));
             }
-        } catch (IOException | NumberFormatException e) {
-            System.out.println("[FileManager] Error loading students: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Error loading students: " + e.getMessage());
         }
         return students;
     }
 
-
-    public void saveCourses(List<Course> courses) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(COURSES_FILE))) {
-            for (Course c : courses) {
-                writer.println(c.getCourseId()   + "," +
-                               c.getCourseName() + "," +
-                               c.getCredits());
-            }
+    public void saveCourse(Course course) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(COURSES_FILE, true))) {
+            bw.write(course.getCourseId() + "," +course.getCourseName() + "," +course.getCredits());
+            bw.newLine();
         } catch (IOException e) {
-            System.out.println("[FileManager] Error saving courses: " + e.getMessage());
+            System.out.println("Error saving course: " + e.getMessage());
         }
     }
-
-   
-    public List<Course> loadCourses() {
-        List<Course> courses = new ArrayList<>();
-        File file = new File(COURSES_FILE);
-        if (!file.exists()) return courses;
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+    public ArrayList<String[]> loadCourses() {
+        ArrayList<String[]> courses = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(COURSES_FILE))) {
             String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty()) continue;
-                String[] parts = line.split(",", 3);
-                if (parts.length == 3) {
-                    int    courseId = Integer.parseInt(parts[0].trim());
-                    String name     = parts[1].trim();
-                    int    credits  = Integer.parseInt(parts[2].trim());
-                    courses.add(new Course(courseId, name, credits));
-                }
+            while ((line = br.readLine()) != null) {
+                courses.add(line.split(","));
             }
-        } catch (IOException | NumberFormatException e) {
-            System.out.println("[FileManager] Error loading courses: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Error loading courses: " + e.getMessage());
         }
         return courses;
     }
 
-    public void saveEnrollments(List<Enrollment> enrollments) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(ENROLLMENTS_FILE))) {
-            for (Enrollment e : enrollments) {
-                writer.println(e.toString());
-            }
+    public void saveEnrollment(Enrollment enrollment) {
+        try (BufferedWriter bw = new BufferedWriter(
+                new FileWriter(ENROLLMENTS_FILE, true))) {
+            bw.write(enrollment.toString());
+            bw.newLine();
         } catch (IOException e) {
-            System.out.println("[FileManager] Error saving enrollments: " + e.getMessage());
+            System.out.println("Error saving enrollment: " + e.getMessage());
         }
     }
 
-
-    public List<Enrollment> loadEnrollments() {
-        List<Enrollment> enrollments = new ArrayList<>();
-        File file = new File(ENROLLMENTS_FILE);
-        if (!file.exists()) return enrollments;
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+    public ArrayList<String[]> loadEnrollments() {
+        ArrayList<String[]> enrollments = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(
+                new FileReader(ENROLLMENTS_FILE))) {
             String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty()) continue;
-                String[] parts = line.split(",", 4);
-                if (parts.length == 4) {
-                    int    enrollId  = Integer.parseInt(parts[0].trim());
-                    String date      = parts[1].trim();
-                    int    studentId = Integer.parseInt(parts[2].trim());
-                    int    courseId  = Integer.parseInt(parts[3].trim());
-                    enrollments.add(new Enrollment(enrollId, date, studentId, courseId));
-                }
+            while ((line = br.readLine()) != null) {
+                enrollments.add(line.split(","));
             }
-        } catch (IOException | NumberFormatException e) {
-            System.out.println("[FileManager] Error loading enrollments: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Error loading enrollments: " + e.getMessage());
         }
         return enrollments;
+    }
+
+    public void deleteEnrollment(int enrollmentId) {
+        ArrayList<String> remaining = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(ENROLLMENTS_FILE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (Integer.parseInt(parts[0]) != enrollmentId) {
+                    remaining.add(line);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading enrollments: " + e.getMessage());
+        }
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(ENROLLMENTS_FILE, false))) {
+            for (String line : remaining) {
+                bw.write(line);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            System.out.println("Error updating enrollments: " + e.getMessage());
+        }
     }
 }

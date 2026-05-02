@@ -1,91 +1,79 @@
-import model.Course;
-import model.Student;
-import repository.FileManager;
-import service.CourseService;
-import service.EnrollmentService;
-import service.StudentService;
 
-import java.util.Optional;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        FileManager fileManager = new FileManager();
-        StudentService studentService = new StudentService(fileManager);
-        CourseService courseService = new CourseService(fileManager);
-        EnrollmentService enrollmentService = new EnrollmentService(fileManager);
-
         Scanner sc = new Scanner(System.in);
-        int choice;
+        StudentService studentService = new StudentService();
+        CourseService courseService = new CourseService();
+        EnrollmentService enrollmentService = 
+            new EnrollmentService(courseService);
 
-        do {
-            System.out.println("\n====== Online Course Enrollment ======");
-            System.out.println("1. Add Student");
-            System.out.println("2. Add Course");
-            System.out.println("3. Enroll Student in Course");
-            System.out.println("4. Drop Course");
-            System.out.println("5. List All Students");
-            System.out.println("6. List All Courses");
-            System.out.println("7. List All Enrollments");
-            System.out.println("8. View Student's Courses");
-            System.out.println("9. View Course's Students");
-            System.out.println("0. Exit");
+        while (true) {
+            System.out.println("\n=== Online Course Enrollment System ===");
+            System.out.println("1. Register Student");
+            System.out.println("2. View Available Courses");
+            System.out.println("3. Add Course");
+            System.out.println("4. Enroll in Course");
+            System.out.println("5. Drop Course");
+            System.out.println("6. View My Enrollments");
+            System.out.println("7. View All Students");
+            System.out.println("8. Exit");
             System.out.print("Choice: ");
-            choice = Integer.parseInt(sc.nextLine().trim());
 
-            switch (choice) {
-                case 1 -> {
-                    System.out.print("Student ID: "); int sid = Integer.parseInt(sc.nextLine().trim());
-                    System.out.print("Name: ");       String sname = sc.nextLine().trim();
-                    System.out.print("Department: "); String dept = sc.nextLine().trim();
-                    studentService.addStudent(sid, sname, dept);
+            try {
+                int choice = sc.nextInt();
+                sc.nextLine();
+
+                switch (choice) {
+                    case 1:
+                        System.out.print("Enter name: ");
+                        String name = sc.nextLine();
+                        System.out.print("Enter department: ");
+                        String dept = sc.nextLine();
+                        studentService.registerStudent(name, dept);
+                        break;
+                    case 2:
+                        courseService.viewCourses();
+                        break;
+                    case 3:
+                        System.out.print("Enter course name: ");
+                        String cName = sc.nextLine();
+                        System.out.print("Enter credits: ");
+                        int credits = sc.nextInt();
+                        courseService.addCourse(cName, credits);
+                        break;
+                    case 4:
+                        System.out.print("Enter your student ID: ");
+                        int sId = sc.nextInt();
+                        System.out.print("Enter course ID: ");
+                        int cId = sc.nextInt();
+                        enrollmentService.selectCourse(sId, cId);
+                        break;
+                    case 5:
+                        System.out.print("Enter enrollment ID to drop: ");
+                        int eId = sc.nextInt();
+                        enrollmentService.dropCourse(eId);
+                        break;
+                    case 6:
+                        System.out.print("Enter your student ID: ");
+                        int sid = sc.nextInt();
+                        enrollmentService.viewEnrollments(sid);
+                        break;
+                    case 7:
+                        studentService.displayAllStudents();
+                        break;
+                    case 8:
+                        System.out.println("Goodbye!");
+                        sc.close();
+                        return;
+                    default:
+                        System.out.println("Invalid choice.");
                 }
-                case 2 -> {
-                    System.out.print("Course ID: ");   int cid = Integer.parseInt(sc.nextLine().trim());
-                    System.out.print("Course Name: "); String cname = sc.nextLine().trim();
-                    System.out.print("Credits: ");     int credits = Integer.parseInt(sc.nextLine().trim());
-                    courseService.addCourse(cid, cname, credits);
-                }
-                case 3 -> {
-                    System.out.print("Student ID: "); int sid = Integer.parseInt(sc.nextLine().trim());
-                    System.out.print("Course ID: ");  int cid = Integer.parseInt(sc.nextLine().trim());
-                    Optional<Student> s = studentService.findByStudentId(sid);
-                    Optional<Course>  c = courseService.findById(cid);
-                    if (s.isPresent() && c.isPresent()) enrollmentService.enrollStudent(s.get(), c.get());
-                    else System.out.println("Student or Course not found.");
-                }
-                case 4 -> {
-                    System.out.print("Student ID: "); int sid = Integer.parseInt(sc.nextLine().trim());
-                    System.out.print("Course ID: ");  int cid = Integer.parseInt(sc.nextLine().trim());
-                    Optional<Student> s = studentService.findByStudentId(sid);
-                    Optional<Course>  c = courseService.findById(cid);
-                    if (s.isPresent() && c.isPresent()) enrollmentService.dropCourse(s.get(), c.get());
-                    else System.out.println("Student or Course not found.");
-                }
-                case 5 -> studentService.listAllStudents();
-                case 6 -> courseService.listAllCourses();
-                case 7 -> enrollmentService.listAllEnrollments();
-                case 8 -> {
-                    System.out.print("Student ID: "); int sid = Integer.parseInt(sc.nextLine().trim());
-                    studentService.findByStudentId(sid)
-                        .ifPresentOrElse(
-                            s -> enrollmentService.listCoursesForStudent(s, courseService),
-                            () -> System.out.println("Student not found.")
-                        );
-                }
-                case 9 -> {
-                    System.out.print("Course ID: "); int cid = Integer.parseInt(sc.nextLine().trim());
-                    courseService.findById(cid)
-                        .ifPresentOrElse(
-                            c -> enrollmentService.listStudentsForCourse(c, studentService),
-                            () -> System.out.println("Course not found.")
-                        );
-                }
-                case 0 -> System.out.println("Goodbye!");
-                default -> System.out.println("Invalid option.");
+            } catch (Exception e) {
+                System.out.println("Invalid input: " + e.getMessage());
+                sc.nextLine();
             }
-        } while (choice != 0);
-
-        sc.close();
+        }
     }
 }

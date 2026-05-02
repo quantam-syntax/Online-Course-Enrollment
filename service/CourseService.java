@@ -1,4 +1,7 @@
 package service;
+import model.Course;
+import repository.FileManager;
+import java.util.ArrayList;
 
 import model.Course;
 import repository.FileManager;
@@ -8,76 +11,56 @@ import java.util.List;
 import java.util.Optional;
 
 public class CourseService {
-
-    private final List<Course> courses;
-    private final FileManager  fileManager;
-
-    public CourseService(FileManager fileManager) {
-        this.fileManager = fileManager;
-        this.courses     = new ArrayList<>(fileManager.loadCourses());
+    public ArrayList<Course> courses;
+    private FileManager fileManager;
+    private int courseCounter = 1;
+    public CourseService(){
+        this.courses = new ArrayList<>();
+        this.fileManager = new FileManager();
+        loadFromFile();
     }
+    public void loadFromFile(){
+        ArrayList<String[]> data = fileManager.loadCourses();
+        for (String[] parts : data){
+            if (parts.length == 3){
+                courses.add(new Course(Integer.parseInt(parts[0]),parts[1],Integer.parseInt(parts[2])));
+                courseCounter = Integer.parseInt(parts[0]) + 1;
 
-    public Course addCourse(int courseId, String courseName, int credits) {
-        if (findById(courseId).isPresent()) {
-            System.out.println("[CourseService] Course ID " + courseId + " already exists.");
-            return null;
+
+            }
         }
-        Course course = new Course(courseId, courseName, credits);
+    }
+    public boolean addCourse(String courseName, int credits){
+        Course course = new Course (courseCounter++, courseName , credits);
         courses.add(course);
-        fileManager.saveCourses(courses);
-        System.out.println("[CourseService] Course added: " + courseName);
-        return course;
+        fileManager.saveCourse(course);
+        System.out.println("THe course has been added " + courseName);
+        return true ;
     }
-
-
-    public Optional<Course> findById(int courseId) {
-        return courses.stream()
-                .filter(c -> c.getCourseId() == courseId)
-                .findFirst();
+    public boolean checkAvailability(int courseId){
+        for (Course c : courses){
+            if (c.getCourseId() == courseId)
+                return true;
+        }
+        return false;
     }
-
- 
-    public Optional<Course> findByName(String name) {
-        return courses.stream()
-                .filter(c -> c.getCourseName().equalsIgnoreCase(name))
-                .findFirst();
+    public Course getCourseById(int courseId){
+        for (Course c : courses){
+            if (c.getCourseId() == courseId)
+                return c;
+        }
+        return null;
     }
-
-
-    public List<Course> getAllCourses() {
-        return List.copyOf(courses);
-    }
-
-    public void listAllCourses() {
-        if (courses.isEmpty()) {
-            System.out.println("  No courses available yet.");
+    public void viewCourses(){
+        if (courses.isEmpty()){
+            System.out.println("No course Available");
             return;
         }
-        System.out.println("\n┌──────────────────────────────────────────┐");
-        System.out.println("│               ALL COURSES                │");
-        System.out.println("├───────────┬────────────────────┬──────────┤");
-        System.out.printf( "│ %-9s │ %-18s │ %-8s │%n", "Course ID", "Course Name", "Credits");
-        System.out.println("├───────────┼────────────────────┼──────────┤");
-        for (Course c : courses) {
-            System.out.printf("│ %-9d │ %-18s │ %-8d │%n",
-                    c.getCourseId(), c.getCourseName(), c.getCredits());
+        for (Course c : courses){
+            System.out.println(c.displayCourse());
         }
-        System.out.println("└───────────┴────────────────────┴──────────┘");
     }
-
-    public boolean removeCourse(int courseId) {
-        Optional<Course> opt = findById(courseId);
-        if (opt.isEmpty()) {
-            System.out.println("[CourseService] Course ID " + courseId + " not found.");
-            return false;
-        }
-        courses.remove(opt.get());
-        fileManager.saveCourses(courses);
-        System.out.println("[CourseService] Course removed: " + opt.get().getCourseName());
-        return true;
-    }
-
-    public int getCourseCount() {
-        return courses.size();
+    public ArrayList<Course>getCourses(){
+        return courses;
     }
 }

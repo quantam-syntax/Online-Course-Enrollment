@@ -1,4 +1,7 @@
 package service;
+import model.Student;
+import repository.FileManager;
+import java.util.ArrayList;
 
 import model.Student;
 import repository.FileManager;
@@ -9,82 +12,52 @@ import java.util.Optional;
 
 
 public class StudentService {
-
-    private final List<Student> students;
-    private final FileManager   fileManager;
-    private int nextPersonId; 
-
-    public StudentService(FileManager fileManager) {
-        this.fileManager = fileManager;
-        this.students    = new ArrayList<>(fileManager.loadStudents());
-        this.nextPersonId = students.stream()
-                .mapToInt(Student::getId)
-                .max()
-                .orElse(0) + 1;
+    private ArrayList<Student>students;
+    private FileManager fileManager;
+    private int studentCounter = 1;
+    public StudentService(){
+        this.students = new ArrayList<>();
+        this.fileManager = new FileManager();
+        loadFromFile();
     }
-
-    public Student addStudent(int studentId, String name, String department) {
-        if (findByStudentId(studentId).isPresent()) {
-            System.out.println("[StudentService] Student ID " + studentId + " already exists.");
-            return null;
+    public void loadFromFile(){
+        ArrayList<String[]> data = fileManager.loadStudents();
+        for(String[]parts : data ){
+            if (parts.length == 3){
+                students.add(new Student(Integer.parseInt(parts[0]),Integer.parseInt(parts[0]),parts[1],parts[2]));
+                studentCounter = Integer.parseInt(parts[0]+1);
+            }
         }
-        Student student = new Student(studentId, nextPersonId++, name, department);
+    }
+    public Student registerStudent(String name, String department){
+        Student student = new Student(studentCounter , studentCounter , name , department);
+        studentCounter++;
         students.add(student);
-        fileManager.saveStudents(students);
-        System.out.println("[StudentService] Student registered: " + name);
+        fileManager.saveStudent(student);
+        System.out.println("Student registered ID : "+ student.getStudentId() );
         return student;
     }
-
-    public Optional<Student> findByStudentId(int studentId) {
-        return students.stream()
-                .filter(s -> s.getStudentId() == studentId)
-                .findFirst();
+    public Student getStudentById(int studentId){
+        for (Student s : students){
+            if (s.getStudentId() == studentId){
+                return s;
+            }
+        }
+        return null;
     }
-
-
-    public Optional<Student> findByName(String name) {
-        return students.stream()
-                .filter(s -> s.getName().equalsIgnoreCase(name))
-                .findFirst();
-    }
-
-
-    public List<Student> getAllStudents() {
-        return List.copyOf(students);
-    }
-
-    public void listAllStudents() {
-        if (students.isEmpty()) {
-            System.out.println("  No students registered yet.");
+    public void displayAllStudents(){
+        if (students.isEmpty()){
+            System.out.println("No students registered ");
             return;
         }
-        System.out.println("\n┌─────────────────────────────────────────────────────┐");
-        System.out.println("│                    ALL STUDENTS                     │");
-        System.out.println("├──────────┬────────────────────────┬──────────────────┤");
-        System.out.printf( "│ %-8s │ %-22s │ %-16s │%n", "Stu. ID", "Name", "Department");
-        System.out.println("├──────────┼────────────────────────┼──────────────────┤");
-        for (Student s : students) {
-            System.out.printf("│ %-8d │ %-22s │ %-16s │%n",
-                    s.getStudentId(), s.getName(), s.getDepartment());
+        for (Student s : students ){
+            s.displayInfo();
         }
-        System.out.println("└──────────┴────────────────────────┴──────────────────┘");
     }
-
-
-    public boolean removeStudent(int studentId) {
-        Optional<Student> opt = findByStudentId(studentId);
-        if (opt.isEmpty()) {
-            System.out.println("[StudentService] Student ID " + studentId + " not found.");
-            return false;
+        public ArrayList<Student> getStudents(){
+            return students;
         }
-        students.remove(opt.get());
-        fileManager.saveStudents(students);
-        System.out.println("[StudentService] Student removed: " + opt.get().getName());
-        return true;
-    }
 
 
-    public int getStudentCount() {
-        return students.size();
+        
     }
-}
