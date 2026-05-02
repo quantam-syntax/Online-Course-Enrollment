@@ -1,6 +1,4 @@
-import service.CourseService;
-import service.EnrollmentService;
-import service.StudentService;
+
 import java.util.Scanner;
 
 public class Main {

@@ -5,6 +5,18 @@ import repository.FileManager;
 import java.util.ArrayList;
 import java.time.LocalDate;
 
+import model.Course;
+import model.Enrollment;
+import model.Student;
+import repository.FileManager;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+
 public class EnrollmentService {
     private ArrayList<Enrollment> enrollments;
     private FileManager fileManager;
@@ -71,4 +83,97 @@ public class EnrollmentService {
 
         }
     
+    public boolean isEnrolled(int studentId, int courseId) {
+        return enrollments.stream()
+                .anyMatch(e -> e.getStudentId() == studentId && e.getCourseId() == courseId);
+    }
+
+    public List<Enrollment> getEnrollmentsByStudent(int studentId) {
+        return enrollments.stream()
+                .filter(e -> e.getStudentId() == studentId)
+                .collect(Collectors.toList());
+    }
+
+  
+    public List<Enrollment> getEnrollmentsByCourse(int courseId) {
+        return enrollments.stream()
+                .filter(e -> e.getCourseId() == courseId)
+                .collect(Collectors.toList());
+    }
+
+    public void listCoursesForStudent(Student student, CourseService courseService) {
+        List<Enrollment> list = getEnrollmentsByStudent(student.getStudentId());
+        if (list.isEmpty()) {
+            System.out.println("  " + student.getName() + " is not enrolled in any courses.");
+            return;
+        }
+        System.out.println("\n┌───────────────────────────────────────────────────────────┐");
+        System.out.println("│  Enrollments for: " + padRight(student.getName(), 41) + "│");
+        System.out.println("├──────────────┬──────────────────────┬────────────────────┤");
+        System.out.printf( "│ %-12s │ %-20s │ %-18s │%n", "Enroll. ID", "Course Name", "Date");
+        System.out.println("├──────────────┼──────────────────────┼────────────────────┤");
+        for (Enrollment e : list) {
+            String courseName = courseService.findById(e.getCourseId())
+                    .map(Course::getCourseName)
+                    .orElse("Unknown (" + e.getCourseId() + ")");
+            System.out.printf("│ %-12d │ %-20s │ %-18s │%n",
+                    e.getEnrollmentId(), courseName, e.getEnrollmentDate());
+        }
+        System.out.println("└──────────────┴──────────────────────┴────────────────────┘");
+    }
+    public void listStudentsForCourse(Course course, StudentService studentService) {
+        List<Enrollment> list = getEnrollmentsByCourse(course.getCourseId());
+        if (list.isEmpty()) {
+            System.out.println("  No students enrolled in '" + course.getCourseName() + "' yet.");
+            return;
+        }
+        System.out.println("\n┌──────────────────────────────────────────────────────────┐");
+        System.out.println("│  Students in: " + padRight(course.getCourseName(), 44) + "│");
+        System.out.println("├──────────────┬────────────────────────┬──────────────────┤");
+        System.out.printf( "│ %-12s │ %-22s │ %-16s │%n", "Student ID", "Name", "Department");
+        System.out.println("├──────────────┼────────────────────────┼──────────────────┤");
+        for (Enrollment e : list) {
+            studentService.findByStudentId(e.getStudentId()).ifPresent(s ->
+                System.out.printf("│ %-12d │ %-22s │ %-16s │%n",
+                        s.getStudentId(), s.getName(), s.getDepartment())
+            );
+        }
+        System.out.println("└──────────────┴────────────────────────┴──────────────────┘");
+    }
+
+ 
+    public void listAllEnrollments() {
+        if (enrollments.isEmpty()) {
+            System.out.println("  No enrollments recorded.");
+            return;
+        }
+        System.out.println("\n┌──────────────────────────────────────────────────────────┐");
+        System.out.println("│                    ALL ENROLLMENTS                      │");
+        System.out.println("├──────────────┬────────────┬────────────┬────────────────┤");
+        System.out.printf( "│ %-12s │ %-10s │ %-10s │ %-14s │%n",
+                "Enroll. ID", "Student ID", "Course ID", "Date");
+        System.out.println("├──────────────┼────────────┼────────────┼────────────────┤");
+        for (Enrollment e : enrollments) {
+            System.out.printf("│ %-12d │ %-10d │ %-10d │ %-14s │%n",
+                    e.getEnrollmentId(), e.getStudentId(),
+                    e.getCourseId(), e.getEnrollmentDate());
+        }
+        System.out.println("└──────────────┴────────────┴────────────┴────────────────┘");
+    }
+
+   
+    public int getEnrollmentCount() {
+        return enrollments.size();
+    }
+
+  
+    private Optional<Enrollment> findEnrollment(int studentId, int courseId) {
+        return enrollments.stream()
+                .filter(e -> e.getStudentId() == studentId && e.getCourseId() == courseId)
+                .findFirst();
+    }
+
+    private static String padRight(String s, int n) {
+        return String.format("%-" + n + "s", s);
+    }
 }
