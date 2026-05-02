@@ -3,13 +3,6 @@ import model.Course;
 import repository.FileManager;
 import java.util.ArrayList;
 
-import model.Course;
-import repository.FileManager;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 public class CourseService {
     public ArrayList<Course> courses;
     private FileManager fileManager;
