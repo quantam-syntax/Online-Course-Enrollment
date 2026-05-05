@@ -15,9 +15,15 @@ public class StudentService {
     public void loadFromFile(){
         ArrayList<String[]> data = fileManager.loadStudents();
         for(String[]parts : data ){
-            if (parts.length == 3){
-                students.add(new Student(Integer.parseInt(parts[0]),Integer.parseInt(parts[0]),parts[1],parts[2]));
-                studentCounter = Integer.parseInt(parts[0]+1);
+            if (parts.length != 3) {
+                continue;
+            }
+            try {
+                int id = Integer.parseInt(parts[0].trim());
+                students.add(new Student(id, id, parts[1], parts[2]));
+                studentCounter = Math.max(studentCounter, id + 1);
+            } catch (NumberFormatException ex) {
+                System.out.println("Skipping malformed student row: " + String.join(",", parts));
             }
         }
     }

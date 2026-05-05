@@ -20,9 +20,17 @@ public class EnrollmentService {
     private void loadFromFile(){
         ArrayList<String[]>data = fileManager.loadEnrollments();
         for (String[]parts : data){
-            if (parts.length == 4){
-                enrollments.add(new Enrollment(Integer.parseInt(parts[0]), parts[3] ,Integer.parseInt(parts[1]), Integer.parseInt(parts[2])));
-                enrollmentCounter = Integer.parseInt(parts[0] + 1);
+            if (parts.length != 4){
+                continue;
+            }
+            try {
+                int id = Integer.parseInt(parts[0].trim());
+                int studentId = Integer.parseInt(parts[2].trim());
+                int courseId = Integer.parseInt(parts[3].trim());
+                enrollments.add(new Enrollment(id, parts[1], studentId, courseId));
+                enrollmentCounter = Math.max(enrollmentCounter, id + 1);
+            } catch (NumberFormatException ex) {
+                System.out.println("Skipping malformed enrollment row: " + String.join(",", parts));
             }
         }
 

@@ -15,11 +15,16 @@ public class CourseService {
     public void loadFromFile(){
         ArrayList<String[]> data = fileManager.loadCourses();
         for (String[] parts : data){
-            if (parts.length == 3){
-                courses.add(new Course(Integer.parseInt(parts[0]),parts[1],Integer.parseInt(parts[2])));
-                courseCounter = Integer.parseInt(parts[0]) + 1;
-
-
+            if (parts.length != 3){
+                continue;
+            }
+            try {
+                int id = Integer.parseInt(parts[0].trim());
+                int credits = Integer.parseInt(parts[2].trim());
+                courses.add(new Course(id, parts[1], credits));
+                courseCounter = Math.max(courseCounter, id + 1);
+            } catch (NumberFormatException ex) {
+                System.out.println("Skipping malformed course row: " + String.join(",", parts));
             }
         }
     }
