@@ -9,7 +9,7 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/view/dashboard.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/view/login.fxml"));
         Scene scene = new Scene(loader.load(), 1100, 700);
         String stylesheet = getClass().getResource("/ui/view/style.css").toExternalForm();
         scene.getStylesheets().add(stylesheet);
