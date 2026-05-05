@@ -75,4 +75,8 @@ public class FeesService {
     public ArrayList<Fees> getFeesList() {
         return feesList;
     }
+
+    public ArrayList<Integer> getStudentIds() {
+        return studentIds;
+    }
 }

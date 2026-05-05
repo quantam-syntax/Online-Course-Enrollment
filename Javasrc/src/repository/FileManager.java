@@ -12,13 +12,14 @@ import java.util.ArrayList;
 
 public class FileManager {
 
-    private static final String STUDENTS_FILE = "students.txt";
-    private static final String COURSES_FILE = "courses.txt";
-    private static final String ENROLLMENTS_FILE = "enrollments.txt";
-    private static final String INSTRUCTORS_FILE = "instructors.txt";
-    private static final String DEPARTMENTS_FILE = "departments.txt";
-    private static final String SCHEDULES_FILE = "schedules.txt";
-    private static final String FEES_FILE = "fees.txt";
+    private static final String STUDENTS_FILE = "students.csv";
+    private static final String COURSES_FILE = "courses.csv";
+    private static final String ENROLLMENTS_FILE = "enrollments.csv";
+    private static final String INSTRUCTORS_FILE = "instructors.csv";
+    private static final String DEPARTMENTS_FILE = "departments.csv";
+    private static final String SCHEDULES_FILE = "schedules.csv";
+    private static final String FEES_FILE = "fees.csv";
+    private static final String USERS_FILE = "users.csv";
 
     // ─── Student ────────────────────────────────────────────────────────────────
 
@@ -239,5 +240,34 @@ public class FileManager {
         } catch (IOException e) {
             System.out.println("Error updating fees: " + e.getMessage());
         }
+    }
+
+    // ─── User ────────────────────────────────────────────────────────────────────
+    // Format: username,password,role,studentId
+
+    public void saveUser(model.User user) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(USERS_FILE, true))) {
+            bw.write(user.getUsername() + "," + user.getPassword() + "," + user.getRole() + "," + user.getStudentId());
+            bw.newLine();
+        } catch (IOException e) {
+            System.out.println("Error saving user: " + e.getMessage());
+        }
+    }
+
+    public ArrayList<String[]> loadUsers() {
+        ArrayList<String[]> users = new ArrayList<>();
+        File file = new File(USERS_FILE);
+        if (!file.exists()) {
+            return users;
+        }
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                users.add(line.split(","));
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading users: " + e.getMessage());
+        }
+        return users;
     }
 }
