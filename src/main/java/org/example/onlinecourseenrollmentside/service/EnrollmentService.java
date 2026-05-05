@@ -12,15 +12,25 @@ import java.util.Optional;
 
 public class EnrollmentService {
     private final CourseService courseService;
+    private final DepartmentService departmentService;
     private final Path filePath;
     private final List<Enrollment> enrollments = new ArrayList<>();
 
     public EnrollmentService(CourseService courseService) {
-        this(courseService, Path.of("data", "enrollments.csv"));
+        this(courseService, null, Path.of("data", "enrollments.csv"));
     }
 
-    EnrollmentService(CourseService courseService, Path filePath) {
+    public EnrollmentService(CourseService courseService, Path filePath) {
+        this(courseService, null, filePath);
+    }
+
+    public EnrollmentService(CourseService courseService, DepartmentService departmentService) {
+        this(courseService, departmentService, Path.of("data", "enrollments.csv"));
+    }
+
+    EnrollmentService(CourseService courseService, DepartmentService departmentService, Path filePath) {
         this.courseService = courseService;
+        this.departmentService = departmentService;
         this.filePath = filePath;
         load();
     }
@@ -67,6 +77,20 @@ public class EnrollmentService {
             save();
         }
         return total;
+    }
+
+    public int selectDepartment(int studentId, String departmentName) {
+        if (departmentService == null || departmentName == null || departmentName.isBlank()) {
+            return 0;
+        }
+
+        int added = 0;
+        for (Course course : departmentService.getCoursesForDepartment(departmentName)) {
+            if (selectCourse(studentId, course.getCourseId())) {
+                added++;
+            }
+        }
+        return added;
     }
 
     private void load() {

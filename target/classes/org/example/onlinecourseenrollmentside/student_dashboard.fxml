@@ -39,6 +39,16 @@
         </HBox>
     </VBox>
 
+    <!-- Department enrollment card -->
+    <VBox styleClass="section-card" spacing="10">
+        <Label text="Enroll in a Department" styleClass="section-title"/>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <ComboBox fx:id="departmentsCombo" promptText="Select a department"
+                      styleClass="form-combo" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button text="Enroll Department" onAction="#handleEnrollDepartment" styleClass="btn-primary"/>
+        </HBox>
+    </VBox>
+
     <!-- My Enrollments card -->
     <VBox styleClass="section-card" spacing="8" VBox.vgrow="ALWAYS">
         <Label text="My Enrollments" styleClass="section-title"/>

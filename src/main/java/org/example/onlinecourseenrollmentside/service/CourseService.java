@@ -1,6 +1,8 @@
 package org.example.onlinecourseenrollmentside.service;
 
 import org.example.onlinecourseenrollmentside.model.Course;
+import org.example.onlinecourseenrollmentside.model.Instructor;
+import org.example.onlinecourseenrollmentside.model.Schedule;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,6 +41,18 @@ public class CourseService {
         return true;
     }
 
+    public boolean assignInstructorToCourse(int courseId, Instructor instructor) {
+        for (int i = 0; i < courses.size(); i++) {
+            Course course = courses.get(i);
+            if (course.getCourseId() == courseId) {
+                courses.set(i, new Course(course.getCourseId(), course.getTitle(), course.getFee(), instructor, course.getSchedule()));
+                save();
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void load() {
         try {
             if (!Files.exists(filePath)) {
@@ -50,8 +64,19 @@ public class CourseService {
                 if (line.isBlank()) {
                     continue;
                 }
-                String[] parts = line.split(",", 3);
-                courses.add(new Course(Integer.parseInt(parts[0]), parts[1], Double.parseDouble(parts[2])));
+                String[] parts = line.split(",", -1);
+                if (parts.length < 3) {
+                    continue;
+                }
+                Instructor instructor = null;
+                if (parts.length >= 5 && !parts[3].isBlank() && !parts[4].isBlank()) {
+                    instructor = new Instructor(Integer.parseInt(parts[3]), parts[4]);
+                }
+                Schedule schedule = new Schedule();
+                if (parts.length >= 7) {
+                    schedule = new Schedule(parts[6], parts[5]);
+                }
+                courses.add(new Course(Integer.parseInt(parts[0]), parts[1], Double.parseDouble(parts[2]), instructor, schedule));
             }
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load courses", e);
@@ -60,7 +85,15 @@ public class CourseService {
 
     private void save() {
         List<String> lines = courses.stream()
-                .map(c -> c.getCourseId() + "," + c.getTitle() + "," + c.getFee())
+                .map(c -> {
+                    Instructor instructor = c.getInstructor();
+                    String instructorId = instructor == null ? "" : String.valueOf(instructor.getInstructorId());
+                    String instructorName = instructor == null ? "" : instructor.getName();
+                    Schedule schedule = c.getSchedule();
+                    String day = schedule == null ? "" : schedule.getDay();
+                    String time = schedule == null ? "" : schedule.getTime();
+                    return c.getCourseId() + "," + c.getTitle() + "," + c.getFee() + "," + instructorId + "," + instructorName + "," + day + "," + time;
+                })
                 .toList();
         try {
             Files.write(filePath, lines);

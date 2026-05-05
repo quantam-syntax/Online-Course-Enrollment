@@ -8,6 +8,7 @@ import javafx.scene.control.ListView;
 import org.example.onlinecourseenrollmentside.App;
 import org.example.onlinecourseenrollmentside.model.Course;
 import org.example.onlinecourseenrollmentside.model.Enrollment;
+import org.example.onlinecourseenrollmentside.model.Department;
 
 import java.io.IOException;
 import java.util.List;
@@ -18,6 +19,9 @@ public class StudentController {
 
     @FXML
     private ComboBox<Course> coursesCombo;
+
+    @FXML
+    private ComboBox<Department> departmentsCombo;
 
     @FXML
     private ListView<Enrollment> enrollmentsList;
@@ -36,6 +40,7 @@ public class StudentController {
         }
         welcomeLabel.setText("Welcome, " + App.currentStudent.getName() + " (ID: " + App.currentStudent.getStudentId() + ")");
         coursesCombo.setItems(FXCollections.observableArrayList(App.courseService.getCourses()));
+        departmentsCombo.setItems(FXCollections.observableArrayList(App.departmentService.getDepartments()));
         refreshEnrollmentView();
     }
 
@@ -70,6 +75,21 @@ public class StudentController {
 
     @FXML
     private void handleRefresh() {
+        refreshEnrollmentView();
+    }
+
+    @FXML
+    private void handleEnrollDepartment() {
+        Department selected = departmentsCombo.getValue();
+        if (selected == null || App.currentStudent == null) {
+            statusLabel.setText("Select a department first.");
+            return;
+        }
+
+        int added = App.enrollmentService.selectDepartment(App.currentStudent.getStudentId(), selected.getName());
+        statusLabel.setText(added > 0
+                ? "Department enrollment successful. Added " + added + " course(s)."
+                : "No new courses were added from that department.");
         refreshEnrollmentView();
     }
 

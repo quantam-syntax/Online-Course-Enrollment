@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
@@ -40,6 +41,29 @@
         </HBox>
     </VBox>
 
+    <!-- Add Instructor card -->
+    <VBox styleClass="section-card" spacing="10">
+        <Label text="Add New Instructor" styleClass="section-title"/>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <TextField fx:id="instructorIdField" promptText="Instructor ID" styleClass="form-field" prefWidth="140"/>
+            <TextField fx:id="instructorNameField" promptText="Instructor Name" styleClass="form-field" HBox.hgrow="ALWAYS"/>
+            <ComboBox fx:id="instructorDepartmentCombo" promptText="Department" styleClass="form-combo" prefWidth="180"/>
+            <ComboBox fx:id="instructorCourseCombo" promptText="Course" styleClass="form-combo" prefWidth="220"/>
+            <Button text="Add Instructor" onAction="#handleAddInstructor" styleClass="btn-primary"/>
+        </HBox>
+        <ListView fx:id="instructorsList" styleClass="data-list" prefHeight="120"/>
+    </VBox>
+
+    <!-- Add Department card -->
+    <VBox styleClass="section-card" spacing="10">
+        <Label text="Add New Department" styleClass="section-title"/>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <TextField fx:id="departmentNameField" promptText="Department Name" styleClass="form-field" HBox.hgrow="ALWAYS"/>
+            <Button text="Add Department" onAction="#handleAddDepartment" styleClass="btn-primary"/>
+        </HBox>
+        <ListView fx:id="departmentsList" styleClass="data-list" prefHeight="120"/>
+    </VBox>
+
     <!-- Add Course card -->
     <VBox styleClass="section-card" spacing="10">
         <Label text="Add New Course" styleClass="section-title"/>
@@ -47,6 +71,10 @@
             <TextField fx:id="courseIdField" promptText="Course ID" styleClass="form-field" prefWidth="100"/>
             <TextField fx:id="courseTitleField" promptText="Course Title" styleClass="form-field" HBox.hgrow="ALWAYS"/>
             <TextField fx:id="courseFeeField" promptText="Fee (₹)" styleClass="form-field" prefWidth="90"/>
+            <TextField fx:id="courseDayField" promptText="Day" styleClass="form-field" prefWidth="110"/>
+            <TextField fx:id="courseTimeField" promptText="Time" styleClass="form-field" prefWidth="110"/>
+            <ComboBox fx:id="courseDepartmentCombo" promptText="Department" styleClass="form-combo" prefWidth="180"/>
+            <ComboBox fx:id="courseInstructorCombo" promptText="Instructor" styleClass="form-combo" prefWidth="180"/>
             <Button text="Add Course" onAction="#handleAddCourse" styleClass="btn-primary"/>
         </HBox>
     </VBox>

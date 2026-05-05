@@ -1,6 +1,6 @@
 package org.example.onlinecourseenrollmentside.service;
 
-import org.example.onlinecourseenrollmentside.model.Student;
+import org.example.onlinecourseenrollmentside.model.Instructor;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,32 +9,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class StudentService {
+public class InstructorService {
     private final Path filePath;
-    private final List<Student> students = new ArrayList<>();
+    private final List<Instructor> instructors = new ArrayList<>();
 
-    public StudentService() {
-        this(Path.of("data", "students.csv"));
+    public InstructorService() {
+        this(Path.of("data", "instructors.csv"));
     }
 
-    StudentService(Path filePath) {
+    InstructorService(Path filePath) {
         this.filePath = filePath;
         load();
     }
 
-    public List<Student> getStudents() {
-        return new ArrayList<>(students);
+    public List<Instructor> getInstructors() {
+        return new ArrayList<>(instructors);
     }
 
-    public Optional<Student> findById(int id) {
-        return students.stream().filter(s -> s.getStudentId() == id).findFirst();
+    public Optional<Instructor> findById(int id) {
+        return instructors.stream().filter(i -> i.getInstructorId() == id).findFirst();
     }
 
-    public boolean addStudent(Student student) {
-        if (findById(student.getStudentId()).isPresent()) {
+    public boolean addInstructor(Instructor instructor) {
+        if (findById(instructor.getInstructorId()).isPresent()) {
             return false;
         }
-        students.add(student);
+        instructors.add(instructor);
         save();
         return true;
     }
@@ -54,22 +54,23 @@ public class StudentService {
                 if (parts.length < 2) {
                     continue;
                 }
-                students.add(new Student(Integer.parseInt(parts[0]), parts[1]));
+                instructors.add(new Instructor(Integer.parseInt(parts[0]), parts[1]));
             }
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to load students", e);
+            throw new IllegalStateException("Failed to load instructors", e);
         }
     }
 
     private void save() {
-        List<String> lines = students.stream()
-                .map(s -> s.getStudentId() + "," + s.getName())
+        List<String> lines = instructors.stream()
+                .map(i -> i.getInstructorId() + "," + i.getName())
                 .toList();
         try {
             Files.write(filePath, lines);
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to save students", e);
+            throw new IllegalStateException("Failed to save instructors", e);
         }
     }
 }
+
 

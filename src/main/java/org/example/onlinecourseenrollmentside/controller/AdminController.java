@@ -2,11 +2,15 @@ package org.example.onlinecourseenrollmentside.controller;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import org.example.onlinecourseenrollmentside.App;
 import org.example.onlinecourseenrollmentside.model.Course;
+import org.example.onlinecourseenrollmentside.model.Department;
+import org.example.onlinecourseenrollmentside.model.Instructor;
+import org.example.onlinecourseenrollmentside.model.Schedule;
 import org.example.onlinecourseenrollmentside.model.Student;
 
 import java.io.IOException;
@@ -19,6 +23,15 @@ public class AdminController {
     private TextField studentNameField;
 
     @FXML
+    private TextField instructorIdField;
+
+    @FXML
+    private TextField instructorNameField;
+
+    @FXML
+    private TextField departmentNameField;
+
+    @FXML
     private TextField courseIdField;
 
     @FXML
@@ -28,7 +41,31 @@ public class AdminController {
     private TextField courseFeeField;
 
     @FXML
+    private TextField courseDayField;
+
+    @FXML
+    private TextField courseTimeField;
+
+    @FXML
+    private ComboBox<Department> instructorDepartmentCombo;
+
+    @FXML
+    private ComboBox<Course> instructorCourseCombo;
+
+    @FXML
+    private ComboBox<Department> courseDepartmentCombo;
+
+    @FXML
+    private ComboBox<Instructor> courseInstructorCombo;
+
+    @FXML
     private ListView<Student> studentsList;
+
+    @FXML
+    private ListView<Instructor> instructorsList;
+
+    @FXML
+    private ListView<Department> departmentsList;
 
     @FXML
     private ListView<Course> coursesList;
@@ -60,18 +97,91 @@ public class AdminController {
     }
 
     @FXML
+    private void handleAddInstructor() {
+        try {
+            int id = Integer.parseInt(instructorIdField.getText().trim());
+            String name = instructorNameField.getText().trim();
+            Department department = instructorDepartmentCombo.getValue();
+            Course course = instructorCourseCombo.getValue();
+            if (name.isBlank()) {
+                statusLabel.setText("Instructor name is required.");
+                return;
+            }
+
+            if (department == null || course == null) {
+                statusLabel.setText("Select a department and a course for the instructor.");
+                return;
+            }
+
+            Instructor newInstructor = new Instructor(id, name);
+            boolean added = App.instructorService.addInstructor(newInstructor);
+            if (added) {
+                boolean courseAssigned = App.courseService.assignInstructorToCourse(course.getCourseId(), newInstructor);
+                App.departmentService.addInstructorToDepartment(department.getName(), id);
+                App.departmentService.addCourseToDepartment(department.getName(), course.getCourseId());
+                if (!courseAssigned) {
+                    statusLabel.setText("Instructor added, but the course could not be updated.");
+                    refreshLists();
+                    return;
+                }
+            }
+            statusLabel.setText(added ? "Instructor added." : "Instructor ID already exists.");
+            refreshLists();
+        } catch (NumberFormatException e) {
+            statusLabel.setText("Instructor ID must be a number.");
+        }
+    }
+
+    @FXML
+    private void handleAddDepartment() {
+        String name = departmentNameField.getText().trim();
+        if (name.isBlank()) {
+            statusLabel.setText("Department name is required.");
+            return;
+        }
+
+        boolean added = App.departmentService.addDepartment(name);
+        statusLabel.setText(added ? "Department added." : "Department already exists.");
+        refreshLists();
+    }
+
+    @FXML
     private void handleAddCourse() {
         try {
             int id = Integer.parseInt(courseIdField.getText().trim());
             String title = courseTitleField.getText().trim();
             double fee = Double.parseDouble(courseFeeField.getText().trim());
+            String day = courseDayField.getText().trim();
+            String time = courseTimeField.getText().trim();
+            Department department = courseDepartmentCombo.getValue();
+            Instructor instructor = courseInstructorCombo.getValue();
 
             if (title.isBlank()) {
                 statusLabel.setText("Course title is required.");
                 return;
             }
 
-            boolean added = App.courseService.addCourse(new Course(id, title, fee));
+            if (day.isBlank() || time.isBlank()) {
+                statusLabel.setText("Course day and time are required.");
+                return;
+            }
+
+            if (department == null || instructor == null) {
+                statusLabel.setText("Select a department and an instructor for the course.");
+                return;
+            }
+
+            Schedule schedule = new Schedule(time, day);
+            if (!schedule.assignSchedule()) {
+                statusLabel.setText("Course day and time are required.");
+                return;
+            }
+
+            boolean added = App.courseService.addCourse(new Course(id, title, fee, instructor, schedule));
+            if (added) {
+                App.departmentService.addCourseToDepartment(department.getName(), id);
+                App.departmentService.addInstructorToDepartment(department.getName(), instructor.getInstructorId());
+            }
             statusLabel.setText(added ? "Course added." : "Course ID already exists.");
             refreshLists();
         } catch (NumberFormatException e) {
@@ -92,6 +202,12 @@ public class AdminController {
 
     private void refreshLists() {
         studentsList.setItems(FXCollections.observableArrayList(App.studentService.getStudents()));
+        instructorsList.setItems(FXCollections.observableArrayList(App.instructorService.getInstructors()));
+        instructorDepartmentCombo.setItems(FXCollections.observableArrayList(App.departmentService.getDepartments()));
+        instructorCourseCombo.setItems(FXCollections.observableArrayList(App.courseService.getCourses()));
+        courseDepartmentCombo.setItems(FXCollections.observableArrayList(App.departmentService.getDepartments()));
+        courseInstructorCombo.setItems(FXCollections.observableArrayList(App.instructorService.getInstructors()));
+        departmentsList.setItems(FXCollections.observableArrayList(App.departmentService.getDepartments()));
         coursesList.setItems(FXCollections.observableArrayList(App.courseService.getCourses()));
     }
 }
