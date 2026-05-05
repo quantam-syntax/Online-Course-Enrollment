@@ -39,6 +39,14 @@ public class StudentService {
         return true;
     }
 
+    public boolean deleteStudent(int studentId) {
+        boolean removed = students.removeIf(s -> s.getStudentId() == studentId);
+        if (removed) {
+            save();
+        }
+        return removed;
+    }
+
     private void load() {
         try {
             if (!Files.exists(filePath)) {

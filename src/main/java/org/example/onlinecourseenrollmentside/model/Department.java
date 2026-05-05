@@ -46,6 +46,14 @@ public class Department {
 		return true;
 	}
 
+	public boolean removeCourseId(int courseId) {
+		return courseIds.remove(Integer.valueOf(courseId));
+	}
+
+	public boolean removeInstructorId(int instructorId) {
+		return instructorIds.remove(Integer.valueOf(instructorId));
+	}
+
 	@Override
 	public String toString() {
 		return name;

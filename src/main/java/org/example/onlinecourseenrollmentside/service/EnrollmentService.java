@@ -93,6 +93,34 @@ public class EnrollmentService {
         return added;
     }
 
+    public int removeEnrollmentsByStudent(int studentId) {
+        int before = enrollments.size();
+        enrollments.removeIf(e -> e.getStudentId() == studentId);
+        int after = enrollments.size();
+        if (after != before) {
+            save();
+        }
+        return before - after;
+    }
+
+    public int removeEnrollmentsByCourse(int courseId) {
+        int before = enrollments.size();
+        enrollments.removeIf(e -> e.getCourseId() == courseId);
+        int after = enrollments.size();
+        if (after != before) {
+            save();
+        }
+        return before - after;
+    }
+
+    public boolean deleteEnrollment(int studentId, int courseId) {
+        boolean removed = enrollments.removeIf(e -> e.getStudentId() == studentId && e.getCourseId() == courseId);
+        if (removed) {
+            save();
+        }
+        return removed;
+    }
+
     private void load() {
         try {
             if (!Files.exists(filePath)) {

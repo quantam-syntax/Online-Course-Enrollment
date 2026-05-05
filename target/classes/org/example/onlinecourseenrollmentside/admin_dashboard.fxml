@@ -52,6 +52,10 @@
             <Button text="Add Instructor" onAction="#handleAddInstructor" styleClass="btn-primary"/>
         </HBox>
         <ListView fx:id="instructorsList" styleClass="data-list" prefHeight="120"/>
+        <HBox spacing="8">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Delete Selected Instructor" onAction="#handleDeleteInstructor" styleClass="btn-danger"/>
+        </HBox>
     </VBox>
 
     <!-- Add Department card -->
@@ -62,6 +66,10 @@
             <Button text="Add Department" onAction="#handleAddDepartment" styleClass="btn-primary"/>
         </HBox>
         <ListView fx:id="departmentsList" styleClass="data-list" prefHeight="120"/>
+        <HBox spacing="8">
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Delete Selected Department" onAction="#handleDeleteDepartment" styleClass="btn-danger"/>
+        </HBox>
     </VBox>
 
     <!-- Add Course card -->
@@ -74,7 +82,7 @@
             <TextField fx:id="courseDayField" promptText="Day" styleClass="form-field" prefWidth="110"/>
             <TextField fx:id="courseTimeField" promptText="Time" styleClass="form-field" prefWidth="110"/>
             <ComboBox fx:id="courseDepartmentCombo" promptText="Department" styleClass="form-combo" prefWidth="180"/>
-            <ComboBox fx:id="courseInstructorCombo" promptText="Instructor" styleClass="form-combo" prefWidth="180"/>
+            <ComboBox fx:id="courseInstructorCombo" promptText="Instructor (optional)" styleClass="form-combo" prefWidth="180"/>
             <Button text="Add Course" onAction="#handleAddCourse" styleClass="btn-primary"/>
         </HBox>
     </VBox>
@@ -88,6 +96,10 @@
                 <Label text="Students" styleClass="section-title" HBox.hgrow="ALWAYS"/>
             </HBox>
             <ListView fx:id="studentsList" styleClass="data-list" VBox.vgrow="ALWAYS" prefHeight="200"/>
+            <HBox spacing="8">
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Delete Selected Student" onAction="#handleDeleteStudent" styleClass="btn-danger"/>
+            </HBox>
         </VBox>
 
         <!-- Courses list card -->
@@ -96,6 +108,10 @@
                 <Label text="Courses" styleClass="section-title" HBox.hgrow="ALWAYS"/>
             </HBox>
             <ListView fx:id="coursesList" styleClass="data-list" VBox.vgrow="ALWAYS" prefHeight="200"/>
+            <HBox spacing="8">
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Delete Selected Course" onAction="#handleDeleteCourse" styleClass="btn-danger"/>
+            </HBox>
         </VBox>
 
     </HBox>

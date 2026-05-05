@@ -166,8 +166,8 @@ public class AdminController {
                 return;
             }
 
-            if (department == null || instructor == null) {
-                statusLabel.setText("Select a department and an instructor for the course.");
+            if (department == null) {
+                statusLabel.setText("Select a department for the course.");
                 return;
             }
 
@@ -180,7 +180,9 @@ public class AdminController {
             boolean added = App.courseService.addCourse(new Course(id, title, fee, instructor, schedule));
             if (added) {
                 App.departmentService.addCourseToDepartment(department.getName(), id);
-                App.departmentService.addInstructorToDepartment(department.getName(), instructor.getInstructorId());
+                if (instructor != null) {
+                    App.departmentService.addInstructorToDepartment(department.getName(), instructor.getInstructorId());
+                }
             }
             statusLabel.setText(added ? "Course added." : "Course ID already exists.");
             refreshLists();
@@ -198,6 +200,68 @@ public class AdminController {
         } catch (IOException e) {
             statusLabel.setText("Unable to return to login.");
         }
+    }
+
+    @FXML
+    private void handleDeleteStudent() {
+        Student selected = studentsList.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            statusLabel.setText("Select a student to delete.");
+            return;
+        }
+        boolean removed = App.studentService.deleteStudent(selected.getStudentId());
+        int removedEnrollments = App.enrollmentService.removeEnrollmentsByStudent(selected.getStudentId());
+        statusLabel.setText(removed ? "Student deleted. Enrollments removed: " + removedEnrollments : "Failed to delete student.");
+        refreshLists();
+    }
+
+    @FXML
+    private void handleDeleteInstructor() {
+        Instructor selected = instructorsList.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            statusLabel.setText("Select an instructor to delete.");
+            return;
+        }
+        boolean removed = App.instructorService.deleteInstructor(selected.getInstructorId());
+        boolean unassigned = App.courseService.unassignInstructorFromCourses(selected.getInstructorId());
+        boolean deptUpdated = App.departmentService.removeInstructorFromDepartments(selected.getInstructorId());
+        statusLabel.setText(removed ? "Instructor deleted." : "Failed to delete instructor.");
+        if (unassigned) {
+            statusLabel.setText(statusLabel.getText() + " Instructor unassigned from some courses.");
+        }
+        if (deptUpdated) {
+            statusLabel.setText(statusLabel.getText() + " Departments updated.");
+        }
+        refreshLists();
+    }
+
+    @FXML
+    private void handleDeleteDepartment() {
+        Department selected = departmentsList.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            statusLabel.setText("Select a department to delete.");
+            return;
+        }
+        boolean removed = App.departmentService.deleteDepartment(selected.getName());
+        statusLabel.setText(removed ? "Department deleted." : "Failed to delete department.");
+        refreshLists();
+    }
+
+    @FXML
+    private void handleDeleteCourse() {
+        Course selected = coursesList.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            statusLabel.setText("Select a course to delete.");
+            return;
+        }
+        boolean removed = App.courseService.deleteCourse(selected.getCourseId());
+        int removedEnrollments = App.enrollmentService.removeEnrollmentsByCourse(selected.getCourseId());
+        boolean deptUpdated = App.departmentService.removeCourseFromDepartments(selected.getCourseId());
+        statusLabel.setText(removed ? "Course deleted. Enrollments removed: " + removedEnrollments : "Failed to delete course.");
+        if (deptUpdated) {
+            statusLabel.setText(statusLabel.getText() + " Departments updated.");
+        }
+        refreshLists();
     }
 
     private void refreshLists() {

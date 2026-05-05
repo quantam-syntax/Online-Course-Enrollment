@@ -72,6 +72,40 @@ public class DepartmentService {
         return added;
     }
 
+    public boolean deleteDepartment(String name) {
+        boolean removed = departments.removeIf(d -> d.getName().equalsIgnoreCase(name));
+        if (removed) {
+            save();
+        }
+        return removed;
+    }
+
+    public boolean removeCourseFromDepartments(int courseId) {
+        boolean changed = false;
+        for (Department d : departments) {
+            if (d.removeCourseId(courseId)) {
+                changed = true;
+            }
+        }
+        if (changed) {
+            save();
+        }
+        return changed;
+    }
+
+    public boolean removeInstructorFromDepartments(int instructorId) {
+        boolean changed = false;
+        for (Department d : departments) {
+            if (d.removeInstructorId(instructorId)) {
+                changed = true;
+            }
+        }
+        if (changed) {
+            save();
+        }
+        return changed;
+    }
+
     public List<Course> getCoursesForDepartment(String departmentName) {
         return findByName(departmentName)
                 .map(department -> {

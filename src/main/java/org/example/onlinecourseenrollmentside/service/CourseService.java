@@ -53,6 +53,30 @@ public class CourseService {
         return false;
     }
 
+    public boolean deleteCourse(int courseId) {
+        boolean removed = courses.removeIf(c -> c.getCourseId() == courseId);
+        if (removed) {
+            save();
+        }
+        return removed;
+    }
+
+    public boolean unassignInstructorFromCourses(int instructorId) {
+        boolean changed = false;
+        for (int i = 0; i < courses.size(); i++) {
+            Course course = courses.get(i);
+            Instructor instr = course.getInstructor();
+            if (instr != null && instr.getInstructorId() == instructorId) {
+                courses.set(i, new Course(course.getCourseId(), course.getTitle(), course.getFee(), null, course.getSchedule()));
+                changed = true;
+            }
+        }
+        if (changed) {
+            save();
+        }
+        return changed;
+    }
+
     private void load() {
         try {
             if (!Files.exists(filePath)) {

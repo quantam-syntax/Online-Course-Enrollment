@@ -39,6 +39,14 @@ public class InstructorService {
         return true;
     }
 
+    public boolean deleteInstructor(int instructorId) {
+        boolean removed = instructors.removeIf(i -> i.getInstructorId() == instructorId);
+        if (removed) {
+            save();
+        }
+        return removed;
+    }
+
     private void load() {
         try {
             if (!Files.exists(filePath)) {
